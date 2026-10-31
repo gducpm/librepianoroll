@@ -1,0 +1,11 @@
+[configuration]
+entry_symbol = "fluidsynth_bridge_init"
+compatibility_minimum = "4.1"
+
+[libraries]
+windows.debug.x86_64 = "res://addons/fluidsynth/bin/godot_fluidsynth.dll"
+windows.release.x86_64 = "res://addons/fluidsynth/bin/godot_fluidsynth.dll"
+linux.debug.x86_64 = "res://addons/fluidsynth/bin/libgodot_fluidsynth.so"
+linux.release.x86_64 = "res://addons/fluidsynth/bin/libgodot_fluidsynth.so"
+macos.debug = "res://addons/fluidsynth/bin/libgodot_fluidsynth.dylib"
+macos.release = "res://addons/fluidsynth/bin/libgodot_fluidsynth.dylib"

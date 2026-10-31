@@ -1,0 +1,92 @@
+[gd_scene format=3 uid="uid://c8402libre001"]
+
+[ext_resource type="Script" uid="uid://82832ced1ft3" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://cfvcn76jy52d7" path="res://scripts/core/playback_controller.gd" id="2_play"]
+[ext_resource type="Script" uid="uid://cdeyosqmaxhy" path="res://scripts/audio/synth_engine.gd" id="3_synth"]
+[ext_resource type="Script" uid="uid://dxr1exh8vsu5y" path="res://scripts/core/live_midi_handler.gd" id="4_live"]
+[ext_resource type="Script" uid="uid://chj1xeq66c5ty" path="res://scripts/render/note_renderer.gd" id="5_render"]
+[ext_resource type="Script" uid="uid://x3giufdjh625" path="res://scripts/render/keyboard_controller.gd" id="6_keys"]
+[ext_resource type="Script" uid="uid://dochqd28snc03" path="res://scripts/render/vfx_manager.gd" id="7_vfx"]
+[ext_resource type="Script" uid="uid://bkq78tfx4yd5j" path="res://scripts/ui/ui_controller.gd" id="8_ui"]
+[ext_resource type="Shader" uid="uid://bnff1w33r1vsq" path="res://shaders/fallboard_reflection.gdshader" id="9_fallboard"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_fallboard"]
+shader = ExtResource("9_fallboard")
+shader_parameter/wood_base = Color(0.04, 0.04, 0.05, 1)
+shader_parameter/rim_color = Color(0.863, 0.208, 0.271, 0.4)
+shader_parameter/glossiness = 0.85
+
+[node name="Main" type="Node2D" unique_id=1251194865]
+script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1735298557]
+
+[node name="PlaybackController" type="Node" parent="." unique_id=1143418781]
+script = ExtResource("2_play")
+
+[node name="SynthEngine" type="Node" parent="." unique_id=1810616981]
+script = ExtResource("3_synth")
+
+[node name="LiveMidiHandler" type="Node" parent="." unique_id=620585395]
+script = ExtResource("4_live")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=639992767]
+
+[node name="Background" type="ColorRect" parent="CanvasLayer" unique_id=1279278421]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.03, 0.03, 0.04, 1)
+
+[node name="Fallboard" type="ColorRect" parent="CanvasLayer" unique_id=1402932529]
+material = SubResource("ShaderMaterial_fallboard")
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -245.0
+offset_bottom = -210.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="NoteRenderer" type="Control" parent="CanvasLayer" unique_id=1080935628 node_paths=PackedStringArray("playback", "keyboard")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = -210.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("5_render")
+playback = NodePath("../../PlaybackController")
+keyboard = NodePath("../Keyboard")
+
+[node name="Keyboard" type="Control" parent="CanvasLayer" unique_id=853829409]
+layout_mode = 3
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -210.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("6_keys")
+
+[node name="VFXManager" type="Node2D" parent="CanvasLayer" unique_id=1392945816]
+script = ExtResource("7_vfx")
+
+[node name="StudioUI" type="Control" parent="CanvasLayer" unique_id=354693099 node_paths=PackedStringArray("playback", "note_renderer", "keyboard", "vfx_manager", "synth_engine")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("8_ui")
+playback = NodePath("../../PlaybackController")
+note_renderer = NodePath("../NoteRenderer")
+keyboard = NodePath("../Keyboard")
+vfx_manager = NodePath("../VFXManager")
+synth_engine = NodePath("../../SynthEngine")

@@ -1,0 +1,61 @@
+name: Build FluidSynth GDExtension
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }} (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            name: Windows x86_64
+            target_artifact: addons/fluidsynth/bin/godot_fluidsynth.dll
+            platform_init: |
+              python scripts/setup_fluidsynth.py --version 2.6.1
+            build_cmd: |
+              cmake -B build
+              cmake --build build --config Release
+
+          - os: ubuntu-latest
+            name: GNU+Linux x86_64
+            target_artifact: addons/fluidsynth/bin/libgodot_fluidsynth.so
+            platform_init: |
+              sudo apt-get update
+              sudo apt-get install -y libfluidsynth-dev libsndfile1-dev pkg-config cmake
+            build_cmd: |
+              cmake -B build -DCMAKE_BUILD_TYPE=Release
+              cmake --build build --config Release
+              cp /usr/lib/x86_64-linux-gnu/libfluidsynth.so* addons/fluidsynth/bin/ 2>/dev/null || true
+
+          - os: macos-latest
+            name: Darwin / macOS Universal
+            target_artifact: addons/fluidsynth/bin/libgodot_fluidsynth.dylib
+            platform_init: |
+              brew install fluidsynth libsndfile pkg-config cmake dylibbundler
+            build_cmd: |
+              cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+              cmake --build build --config Release
+              dylibbundler -b -x addons/fluidsynth/bin/libgodot_fluidsynth.dylib -d addons/fluidsynth/bin/ -p @loader_path -of || true
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup environment
+        run: ${{ matrix.platform_init }}
+
+      - name: Build GDExtension
+        run: ${{ matrix.build_cmd }}
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-fluidsynth-${{ matrix.os }}
+          path: addons/fluidsynth/bin/*

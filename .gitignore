@@ -1,0 +1,70 @@
+# Godot 4+ cache and imported resource folder
+.godot/
+*.translation
+
+# Build and export output directories
+build/
+bin/
+release-artifacts/
+
+# Standalone exported binaries and packages
+*.pck
+*.exe
+*.x86_64
+*.apk
+*.aab
+*.dmg
+
+# GDExtension binaries & native build outputs
+addons/fluidsynth/bin/*.dll
+addons/fluidsynth/bin/*.so
+addons/fluidsynth/bin/*.dylib
+*.dll
+*.so
+*.dylib
+*.lib
+*.a
+*.exp
+*.obj
+*.o
+*.pdb
+*.ilk
+*.idb
+
+# Python cache & virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# Test run captures and logs
+debug_capture.png*
+glass_snapshot_t2.png*
+glass_rousseau_t2.png*
+preview_glass_render.png*
+*.log
+
+# Exported movie files / video captures
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# IDE and Editor configs
+.vscode/
+.vs/
+.idea/
+*.user
+*.suo
+CMakeSettings.json
+CMakeUserPresets.json
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+*.tmp
+*~
+*.swp

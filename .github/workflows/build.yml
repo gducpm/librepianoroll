@@ -1,0 +1,191 @@
+name: Release Build & Packaging
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+      - 'v*.*.*-beta*'
+      - '*.*.*'
+      - '*.*.*-beta*'
+  workflow_dispatch:
+
+env:
+  GODOT_VERSION: "4.3.0"
+
+jobs:
+  # 1. Compile FluidSynth GDExtensions for all 3 OS platforms
+  build-extensions:
+    name: Build Native Extension (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-2022
+            name: Windows x86_64
+            target_dir: windows
+            platform_init: |
+              python scripts/setup_fluidsynth.py --version 2.6.1
+            build_cmd: |
+              cmake -B build
+              cmake --build build --config Release
+
+          - os: ubuntu-latest
+            name: GNU+Linux x86_64
+            target_dir: gnu-linux
+            platform_init: |
+              sudo apt-get update
+              sudo apt-get install -y libfluidsynth-dev libsndfile1-dev pkg-config cmake
+            build_cmd: |
+              cmake -B build -DCMAKE_BUILD_TYPE=Release
+              cmake --build build --config Release
+              cp /usr/lib/x86_64-linux-gnu/libfluidsynth.so* addons/fluidsynth/bin/ 2>/dev/null || true
+
+          - os: macos-latest
+            name: Darwin / macOS Universal
+            target_dir: macos
+            platform_init: |
+              brew install fluidsynth libsndfile pkg-config cmake dylibbundler
+            build_cmd: |
+              cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+              cmake --build build --config Release
+              dylibbundler -b -x addons/fluidsynth/bin/libgodot_fluidsynth.dylib -d addons/fluidsynth/bin/ -p @loader_path -of || true
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Setup Platform Environment
+        run: ${{ matrix.platform_init }}
+
+      - name: Compile Extension
+        run: ${{ matrix.build_cmd }}
+
+      - name: Upload Binary Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-${{ matrix.target_dir }}
+          path: addons/fluidsynth/bin/*
+
+  # 2. Export Godot Game and Package Releases
+  export-and-package:
+    name: Export & Package (${{ matrix.name }})
+    needs: build-extensions
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows
+            os: windows-latest
+            preset: "Windows Desktop"
+            build_dir: "build/windows"
+            ext_dir: "windows"
+            binary_name: "LibrePianoRoll.exe"
+            package_name: "LibrePianoRoll-Windows-Portable.zip"
+            is_windows: true
+
+          - name: GNU+Linux
+            os: ubuntu-latest
+            preset: "GNU+Linux"
+            build_dir: "build/gnu-linux"
+            ext_dir: "gnu-linux"
+            binary_name: "LibrePianoRoll.x86_64"
+            package_name: "LibrePianoRoll-GNU+Linux-x86_64.tar.gz"
+            is_windows: false
+
+          - name: Darwin / macOS
+            os: macos-latest
+            preset: "macOS"
+            build_dir: "build/macos"
+            ext_dir: "macos"
+            binary_name: "LibrePianoRoll.zip"
+            package_name: "LibrePianoRoll-MacOS-Universal.zip"
+            is_windows: false
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Download Extension Binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: extension-${{ matrix.ext_dir }}
+          path: addons/fluidsynth/bin
+
+      - name: Setup Godot & Export Templates
+        uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+          include-templates: true
+
+      - name: Export Release Binary
+        run: |
+          mkdir -p ${{ matrix.build_dir }}
+          godot --headless --export-release "${{ matrix.preset }}" "${{ matrix.build_dir }}/${{ matrix.binary_name }}"
+        shell: bash
+
+      - name: Copy Extension Binaries to Export Folder
+        run: |
+          mkdir -p ${{ matrix.build_dir }}/addons/fluidsynth/bin
+          cp -r addons/fluidsynth/bin/* ${{ matrix.build_dir }}/addons/fluidsynth/bin/ || true
+          cp addons/fluidsynth/fluidsynth.gdextension ${{ matrix.build_dir }}/addons/fluidsynth/ || true
+          cp default.sf3 ${{ matrix.build_dir }}/ || true
+          cp default.mid ${{ matrix.build_dir }}/ || true
+          cp LICENSE ${{ matrix.build_dir }}/ || true
+        shell: bash
+
+      # --- NSIS Windows Installer Generation ---
+      - name: Build Windows NSIS Installer
+        if: matrix.is_windows
+        run: |
+          makensis /DVERSION=${{ github.ref_name }} scripts/installer.nsi
+        shell: cmd
+
+      # --- Packaging Portable Archives ---
+      - name: Package Portable Archive
+        run: |
+          cd ${{ matrix.build_dir }}
+          if [ "${{ matrix.name }}" = "GNU+Linux" ]; then
+            chmod +x LibrePianoRoll.x86_64* || true
+            tar -czvf ../${{ matrix.package_name }} *
+          elif [ "${{ matrix.name }}" = "MacOS" ]; then
+            zip -r ../${{ matrix.package_name }} *
+          else
+            zip -r ../${{ matrix.package_name }} *
+          fi
+        shell: bash
+
+      - name: Upload Release Files Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.name }}
+          path: build/*.*
+
+  # 3. Publish to GitHub Releases (only on tags)
+  publish-release:
+    name: Publish GitHub Release
+    needs: export-and-package
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download All Release Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all_release_files
+
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          files: all_release_files/*/*
+          draft: false
+          prerelease: ${{ contains(github.ref, 'beta') }}
+          generate_release_notes: true

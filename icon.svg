@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f0f15"/>
+      <stop offset="100%" stop-color="#1e1218"/>
+    </linearGradient>
+    <linearGradient id="redGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff6b81"/>
+      <stop offset="60%" stop-color="#dc3545"/>
+      <stop offset="100%" stop-color="#b02a37"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <rect width="128" height="128" rx="24" fill="url(#bg)"/>
+  <rect x="2" y="2" width="124" height="124" rx="22" fill="none" stroke="#dc3545" stroke-width="2" opacity="0.4"/>
+  <!-- Falling notes with glow -->
+  <rect x="24" y="16" width="14" height="42" rx="7" fill="url(#redGlow)" filter="url(#glow)"/>
+  <rect x="44" y="28" width="14" height="30" rx="7" fill="#ff758c" filter="url(#glow)"/>
+  <rect x="70" y="12" width="14" height="50" rx="7" fill="url(#redGlow)" filter="url(#glow)"/>
+  <rect x="90" y="22" width="14" height="38" rx="7" fill="#ff4d6d" filter="url(#glow)"/>
+  <!-- Piano keys at bottom -->
+  <rect x="16" y="80" width="96" height="34" rx="4" fill="#202028"/>
+  <!-- White keys -->
+  <rect x="20" y="82" width="11" height="30" rx="2" fill="#f8f9fa"/>
+  <rect x="33" y="82" width="11" height="30" rx="2" fill="#f8f9fa"/>
+  <rect x="46" y="82" width="11" height="30" rx="2" fill="#f8f9fa"/>
+  <rect x="59" y="82" width="11" height="30" rx="2" fill="#f8f9fa"/>
+  <rect x="72" y="82" width="11" height="30" rx="2" fill="#f8f9fa"/>
+  <rect x="85" y="82" width="11" height="30" rx="2" fill="#f8f9fa"/>
+  <rect x="98" y="82" width="11" height="30" rx="2" fill="#f8f9fa"/>
+  <!-- Active keys glowing red -->
+  <rect x="20" y="82" width="11" height="30" rx="2" fill="#dc3545" opacity="0.9" filter="url(#glow)"/>
+  <rect x="72" y="82" width="11" height="30" rx="2" fill="#dc3545" opacity="0.9" filter="url(#glow)"/>
+  <!-- Black keys -->
+  <rect x="28" y="82" width="7" height="18" rx="1.5" fill="#111116"/>
+  <rect x="41" y="82" width="7" height="18" rx="1.5" fill="#111116"/>
+  <rect x="67" y="82" width="7" height="18" rx="1.5" fill="#111116"/>
+  <rect x="80" y="82" width="7" height="18" rx="1.5" fill="#111116"/>
+  <rect x="93" y="82" width="7" height="18" rx="1.5" fill="#111116"/>
+</svg>
