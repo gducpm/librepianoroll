@@ -47,7 +47,7 @@ A free MIDI-Piano visualizer - free as in YOUR freedom.
    - **Darwin / macOS**:  
      ```bash
      brew install fluidsynth libsndfile cmake pkg-config
-     cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+     cmake -B build -DCMAKE_BUILD_TYPE=Release
      cmake --build build --config Release
      ```  
    *The compiled library will automatically be placed in `addons/fluidsynth/bin/`.*  

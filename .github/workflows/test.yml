@@ -39,12 +39,12 @@ jobs:
               cp /usr/lib/x86_64-linux-gnu/libfluidsynth.so* addons/fluidsynth/bin/ 2>/dev/null || true
 
           - os: macos-latest
-            name: Darwin / macOS Universal
+            name: Darwin / macOS
             target_artifact: addons/fluidsynth/bin/libgodot_fluidsynth.dylib
             platform_init: |
               brew install fluidsynth libsndfile pkg-config cmake dylibbundler
             build_cmd: |
-              cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+              cmake -B build -DCMAKE_BUILD_TYPE=Release
               cmake --build build --config Release
               dylibbundler -b -x addons/fluidsynth/bin/libgodot_fluidsynth.dylib -d addons/fluidsynth/bin/ -p @loader_path -of || true
 

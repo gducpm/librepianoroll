@@ -51,9 +51,8 @@ elseif(APPLE)
         BUILD_WITH_INSTALL_RPATH TRUE
     )
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(FLUIDSYNTH REQUIRED fluidsynth)
-    target_include_directories(godot_fluidsynth PRIVATE ${FLUIDSYNTH_INCLUDE_DIRS})
-    target_link_libraries(godot_fluidsynth PRIVATE ${FLUIDSYNTH_LIBRARIES})
+    pkg_check_modules(FLUIDSYNTH REQUIRED IMPORTED_TARGET fluidsynth)
+    target_link_libraries(godot_fluidsynth PRIVATE PkgConfig::FLUIDSYNTH)
 else()
     # GNU+Linux
     set_target_properties(godot_fluidsynth PROPERTIES
@@ -63,7 +62,6 @@ else()
         BUILD_WITH_INSTALL_RPATH TRUE
     )
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(FLUIDSYNTH REQUIRED fluidsynth)
-    target_include_directories(godot_fluidsynth PRIVATE ${FLUIDSYNTH_INCLUDE_DIRS})
-    target_link_libraries(godot_fluidsynth PRIVATE ${FLUIDSYNTH_LIBRARIES})
+    pkg_check_modules(FLUIDSYNTH REQUIRED IMPORTED_TARGET fluidsynth)
+    target_link_libraries(godot_fluidsynth PRIVATE PkgConfig::FLUIDSYNTH)
 endif()
