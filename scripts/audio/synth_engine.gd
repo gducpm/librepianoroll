@@ -18,7 +18,7 @@ class_name SynthEngine
 extends Node
 
 ## High-performance FluidSynth SoundFont synthesis engine streamed natively into Godot's audio bus.
-@export var volume_linear: float = 0.50
+@export var volume_linear: float = 1.0
 
 var fs = null
 var soundfont_loaded: bool = false
@@ -55,8 +55,8 @@ func _init_fluidsynth() -> void:
 		printerr("SynthEngine: Failed to instantiate FluidSynthEngine.")
 		return
 
-	# Initialize FluidSynth with MuseScore base gain and dynamic sample loading (fast load, zero OOM)
-	var initial_gain: float = clampf(volume_linear * 0.40, 0.05, 1.0)
+	# Initialize FluidSynth with MuseScore base gain (1.0 = full dynamic range) and dynamic sample loading (fast load, zero OOM)
+	var initial_gain: float = clampf(volume_linear, 0.05, 2.0)
 	var ok: bool = fs.init_synth(initial_gain)
 	if ok:
 		print("SynthEngine: Native FluidSynth DSP initialized successfully.")
@@ -117,7 +117,7 @@ func all_notes_off() -> void:
 func set_volume(vol: float) -> void:
 	volume_linear = clampf(vol, 0.0, 2.0)
 	if fs:
-		fs.set_gain(clampf(volume_linear * 0.40, 0.0, 1.0))
+		fs.set_gain(clampf(volume_linear, 0.0, 2.0))
 
 func pitch_bend(value: int) -> void:
 	if fs:

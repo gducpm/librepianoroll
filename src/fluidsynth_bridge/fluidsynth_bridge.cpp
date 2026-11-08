@@ -41,6 +41,9 @@ static GDExtensionInterfaceClassdbConstructObject3 g_classdb_construct_object3 =
 static GDExtensionInterfaceClassdbConstructObject g_classdb_construct_object = NULL;
 static GDExtensionInterfaceObjectSetInstance g_object_set_instance = NULL;
 static GDExtensionInterfaceClassdbRegisterExtensionClass6 g_classdb_register_extension_class6 = NULL;
+static GDExtensionInterfaceClassdbRegisterExtensionClass3 g_classdb_register_extension_class3 = NULL;
+static GDExtensionInterfaceClassdbRegisterExtensionClass2 g_classdb_register_extension_class2 = NULL;
+static GDExtensionInterfaceClassdbRegisterExtensionClass g_classdb_register_extension_class = NULL;
 static GDExtensionInterfaceClassdbRegisterExtensionClassMethod g_classdb_register_extension_class_method = NULL;
 
 static GDExtensionInterfacePackedVector2ArrayOperatorIndex g_packed_vector2_array_operator_index = NULL;
@@ -124,14 +127,14 @@ static void variant_get_cstring(GDExtensionConstVariantPtr var_ptr, char *out_bu
     }
 }
 
-// --- Method 1: init_synth(gain: float = 0.2) -> bool ---
+// --- Method 1: init_synth(gain: float = 1.0) -> bool ---
 static void call_init_synth(void *method_userdata, GDExtensionClassInstancePtr p_instance, const GDExtensionConstVariantPtr *p_args, GDExtensionInt p_argument_count, GDExtensionVariantPtr r_return, GDExtensionCallError *r_error) {
     FluidSynthEngine *engine = (FluidSynthEngine *)p_instance;
     if (!engine) return;
 
     engine_cleanup(engine);
 
-    double gain = 0.2;
+    double gain = 1.0;
     if (p_argument_count > 0 && p_args[0]) {
         g_to_float(&gain, (GDExtensionVariantPtr)p_args[0]);
     }
@@ -147,7 +150,7 @@ static void call_init_synth(void *method_userdata, GDExtensionClassInstancePtr p
     fluid_settings_setint(engine->settings, "synth.dynamic-sample-loading", 1);
     fluid_settings_setnum(engine->settings, "synth.sample-rate", 44100.0);
     fluid_settings_setint(engine->settings, "synth.polyphony", 256);
-    fluid_settings_setnum(engine->settings, "synth.gain", gain > 0.0 ? gain : 0.2);
+    fluid_settings_setnum(engine->settings, "synth.gain", gain > 0.0 ? gain : 1.0);
 
     engine->synth = new_fluid_synth(engine->settings);
     if (!engine->synth) {
@@ -409,22 +412,69 @@ static void initialize_level(void *userdata, GDExtensionInitializationLevel leve
         g_string_name_new_with_utf8_chars(SNAME(g_strname_empty_buf), "");
         g_string_new_with_utf8_chars(STR(g_str_empty_buf), "");
 
-        // Register FluidSynthEngine
-        GDExtensionClassCreationInfo6 cinfo;
-        memset(&cinfo, 0, sizeof(cinfo));
-        cinfo.is_virtual = false;
-        cinfo.is_abstract = false;
-        cinfo.is_exposed = true;
-        cinfo.is_runtime = true;
-        cinfo.create_instance_func = fluidsynth_create_instance;
-        cinfo.free_instance_func = fluidsynth_free_instance;
+        // Register FluidSynthEngine with backward-compatible fallback across Godot 4.1 - 4.7+
+        if (g_classdb_register_extension_class6) {
+            GDExtensionClassCreationInfo6 cinfo;
+            memset(&cinfo, 0, sizeof(cinfo));
+            cinfo.is_virtual = false;
+            cinfo.is_abstract = false;
+            cinfo.is_exposed = true;
+            cinfo.is_runtime = true;
+            cinfo.create_instance_func = fluidsynth_create_instance;
+            cinfo.free_instance_func = fluidsynth_free_instance;
 
-        g_classdb_register_extension_class6(
-            g_library,
-            SNAME_CONST(g_strname_engine_buf),
-            SNAME_CONST(g_strname_ref_counted_buf),
-            &cinfo
-        );
+            g_classdb_register_extension_class6(
+                g_library,
+                SNAME_CONST(g_strname_engine_buf),
+                SNAME_CONST(g_strname_ref_counted_buf),
+                &cinfo
+            );
+        } else if (g_classdb_register_extension_class3) {
+            GDExtensionClassCreationInfo3 cinfo;
+            memset(&cinfo, 0, sizeof(cinfo));
+            cinfo.is_virtual = false;
+            cinfo.is_abstract = false;
+            cinfo.is_exposed = true;
+            cinfo.is_runtime = true;
+            cinfo.create_instance_func = (GDExtensionClassCreateInstance)fluidsynth_create_instance;
+            cinfo.free_instance_func = fluidsynth_free_instance;
+
+            g_classdb_register_extension_class3(
+                g_library,
+                SNAME_CONST(g_strname_engine_buf),
+                SNAME_CONST(g_strname_ref_counted_buf),
+                &cinfo
+            );
+        } else if (g_classdb_register_extension_class2) {
+            GDExtensionClassCreationInfo2 cinfo;
+            memset(&cinfo, 0, sizeof(cinfo));
+            cinfo.is_virtual = false;
+            cinfo.is_abstract = false;
+            cinfo.is_exposed = true;
+            cinfo.create_instance_func = (GDExtensionClassCreateInstance)fluidsynth_create_instance;
+            cinfo.free_instance_func = fluidsynth_free_instance;
+
+            g_classdb_register_extension_class2(
+                g_library,
+                SNAME_CONST(g_strname_engine_buf),
+                SNAME_CONST(g_strname_ref_counted_buf),
+                &cinfo
+            );
+        } else if (g_classdb_register_extension_class) {
+            GDExtensionClassCreationInfo cinfo;
+            memset(&cinfo, 0, sizeof(cinfo));
+            cinfo.is_virtual = false;
+            cinfo.is_abstract = false;
+            cinfo.create_instance_func = (GDExtensionClassCreateInstance)fluidsynth_create_instance;
+            cinfo.free_instance_func = fluidsynth_free_instance;
+
+            g_classdb_register_extension_class(
+                g_library,
+                SNAME_CONST(g_strname_engine_buf),
+                SNAME_CONST(g_strname_ref_counted_buf),
+                &cinfo
+            );
+        }
 
         // 1. init_synth(gain: float = 0.2) -> bool
         {
@@ -556,6 +606,15 @@ extern "C" GD_EXPORT GDExtensionBool fluidsynth_bridge_init(
     g_object_set_instance = (GDExtensionInterfaceObjectSetInstance)p_get_proc_address("object_set_instance");
 
     g_classdb_register_extension_class6 = (GDExtensionInterfaceClassdbRegisterExtensionClass6)p_get_proc_address("classdb_register_extension_class6");
+    if (!g_classdb_register_extension_class6) {
+        g_classdb_register_extension_class3 = (GDExtensionInterfaceClassdbRegisterExtensionClass3)p_get_proc_address("classdb_register_extension_class3");
+        if (!g_classdb_register_extension_class3) {
+            g_classdb_register_extension_class2 = (GDExtensionInterfaceClassdbRegisterExtensionClass2)p_get_proc_address("classdb_register_extension_class2");
+            if (!g_classdb_register_extension_class2) {
+                g_classdb_register_extension_class = (GDExtensionInterfaceClassdbRegisterExtensionClass)p_get_proc_address("classdb_register_extension_class");
+            }
+        }
+    }
     g_classdb_register_extension_class_method = (GDExtensionInterfaceClassdbRegisterExtensionClassMethod)p_get_proc_address("classdb_register_extension_class_method");
 
     g_packed_vector2_array_operator_index = (GDExtensionInterfacePackedVector2ArrayOperatorIndex)p_get_proc_address("packed_vector2_array_operator_index");
