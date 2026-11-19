@@ -36,8 +36,9 @@ jobs:
             name: Darwin / macOS Universal
             target_artifact: addons/fluidsynth/bin/libgodot_fluidsynth.dylib
             platform_init: |
-              brew install fluidsynth libsndfile pkg-config cmake dylibbundler
+              brew install fluidsynth libsndfile readline pkg-config cmake dylibbundler
             build_cmd: |
+              export PKG_CONFIG_PATH="$(brew --prefix)/lib/pkgconfig:$(brew --prefix readline)/lib/pkgconfig:$PKG_CONFIG_PATH"
               cmake -B build -DCMAKE_BUILD_TYPE=Release
               cmake --build build --config Release
               dylibbundler -b -x addons/fluidsynth/bin/libgodot_fluidsynth.dylib -d addons/fluidsynth/bin/ -p @loader_path -of || true

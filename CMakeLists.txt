@@ -50,9 +50,28 @@ elseif(APPLE)
         INSTALL_RPATH "@loader_path"
         BUILD_WITH_INSTALL_RPATH TRUE
     )
+
+    # Detect Homebrew prefix on macOS (Apple Silicon: /opt/homebrew, Intel: /usr/local)
+    if(EXISTS "/opt/homebrew/bin/brew")
+        set(HOMEBREW_PREFIX "/opt/homebrew")
+    elseif(EXISTS "/usr/local/bin/brew")
+        set(HOMEBREW_PREFIX "/usr/local")
+    endif()
+
+    if(DEFINED HOMEBREW_PREFIX)
+        list(PREPEND CMAKE_PREFIX_PATH "${HOMEBREW_PREFIX}")
+        # Add Homebrew pkgconfig paths including keg-only packages (readline) required by fluidsynth 2.6.2+
+        set(ENV{PKG_CONFIG_PATH} "${HOMEBREW_PREFIX}/lib/pkgconfig:${HOMEBREW_PREFIX}/opt/readline/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+    endif()
+
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(FLUIDSYNTH REQUIRED IMPORTED_TARGET fluidsynth)
     target_link_libraries(godot_fluidsynth PRIVATE PkgConfig::FLUIDSYNTH)
+
+    # Direct include fallback in case pkg-config fails to propagate header paths
+    if(DEFINED HOMEBREW_PREFIX AND EXISTS "${HOMEBREW_PREFIX}/include")
+        target_include_directories(godot_fluidsynth PRIVATE "${HOMEBREW_PREFIX}/include")
+    endif()
 else()
     # GNU+Linux
     set_target_properties(godot_fluidsynth PROPERTIES
