@@ -72,16 +72,18 @@ typedef struct {
 
 static void engine_cleanup(FluidSynthEngine *engine) {
     if (!engine) return;
-    if (engine->synth) {
-        delete_fluid_synth(engine->synth);
-        engine->synth = NULL;
+    engine->is_active = false;
+    fluid_synth_t *synth = engine->synth;
+    engine->synth = NULL;
+    if (synth) {
+        delete_fluid_synth(synth);
     }
-    if (engine->settings) {
-        delete_fluid_settings(engine->settings);
-        engine->settings = NULL;
+    fluid_settings_t *settings = engine->settings;
+    engine->settings = NULL;
+    if (settings) {
+        delete_fluid_settings(settings);
     }
     engine->sf_id = -1;
-    engine->is_active = false;
 }
 
 // --- Lifecycle Callbacks ---
@@ -195,7 +197,7 @@ static void call_render_frames(void *method_userdata, GDExtensionClassInstancePt
         int64_t ret_code = 0;
         g_pv2_resize(pv2_storage, resize_args, &ret_code, 1);
 
-        if (engine && engine->synth) {
+        if (engine && engine->synth && engine->is_active) {
             float *out_data = (float *)g_packed_vector2_array_operator_index(pv2_storage, 0);
             if (out_data) {
                 // Interleaved stereo: left at offset 0 step 2, right at offset 1 step 2

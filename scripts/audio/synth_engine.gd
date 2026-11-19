@@ -128,6 +128,8 @@ func control_change(controller: int, value: int) -> void:
 		fs.control_change(0, clampi(controller, 0, 127), clampi(value, 0, 127))
 
 func _exit_tree() -> void:
+	if player:
+		player.stop()
 	if fs:
 		fs.close()
 		fs = null

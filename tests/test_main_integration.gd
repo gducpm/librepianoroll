@@ -17,6 +17,9 @@
 extends SceneTree
 
 func _init() -> void:
+	call_deferred("_run_tests")
+
+func _run_tests() -> void:
 	print("=== LibrePianoRoll: Starting Integration Test ===")
 
 	var main_scene_res: PackedScene = load("res://scenes/main.tscn")
@@ -26,6 +29,9 @@ func _init() -> void:
 	assert(main_node != null, "Failed to instantiate scenes/main.tscn")
 
 	root.add_child(main_node)
+
+	# Yield a frame for nodes to complete _ready() initialization cleanly
+	await process_frame
 
 	var playback: PlaybackController = main_node.get_node("PlaybackController")
 	var keyboard: KeyboardController = main_node.get_node("CanvasLayer/Keyboard")
@@ -136,4 +142,16 @@ func _init() -> void:
 	assert(renderer.visible, "NoteRenderer should be visible after exiting Freeplay")
 
 	print("=== All Integration Tests Passed With 100% Success! ===")
+
+	# Clean up and flush scene tree safely before quit
+	if synth and synth.player:
+		synth.player.stop()
+	if synth and synth.fs:
+		synth.fs.close()
+		synth.fs = null
+	if main_node:
+		root.remove_child(main_node)
+		main_node.free()
+	await process_frame
+
 	quit(0)
