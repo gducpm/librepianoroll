@@ -24,6 +24,10 @@ signal midi_device_connected(device_name: String)
 @export var is_enabled: bool = true
 
 func _ready() -> void:
+	if DisplayServer.get_name() == "headless":
+		print("LibrePianoRoll: Headless environment detected, skipping hardware MIDI input initialization.")
+		return
+
 	OS.open_midi_inputs()
 	var connected_devices := OS.get_connected_midi_inputs()
 	if not connected_devices.is_empty():
@@ -32,6 +36,10 @@ func _ready() -> void:
 			midi_device_connected.emit(d)
 	else:
 		print("LibrePianoRoll: No MIDI hardware connected (live input ready)")
+
+func _exit_tree() -> void:
+	if DisplayServer.get_name() != "headless":
+		OS.close_midi_inputs()
 
 func _input(event: InputEvent) -> void:
 	if not is_enabled:

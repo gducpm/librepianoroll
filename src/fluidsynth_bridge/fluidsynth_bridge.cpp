@@ -149,6 +149,7 @@ static void call_init_synth(void *method_userdata, GDExtensionClassInstancePtr p
     }
 
     // MuseScore configurations + Dynamic Sample Loading (prevents OOM, loads in ~3s)
+    fluid_settings_setstr(engine->settings, "audio.driver", "file");
     fluid_settings_setint(engine->settings, "synth.dynamic-sample-loading", 1);
     fluid_settings_setnum(engine->settings, "synth.sample-rate", 44100.0);
     fluid_settings_setint(engine->settings, "synth.polyphony", 256);

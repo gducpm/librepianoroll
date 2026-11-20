@@ -80,7 +80,7 @@ jobs:
       - name: Install Runtime Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libfluidsynth-dev libsndfile1-dev
+          sudo apt-get install -y libfluidsynth-dev libsndfile1-dev libasound2-dev
 
       - name: Download GNU+Linux Extension Artifact
         uses: actions/download-artifact@v4
@@ -102,7 +102,7 @@ jobs:
       - name: Run Test Suite
         run: |
           echo "Running MIDI Parser Tests..."
-          godot --headless -s tests/test_midi_parser.gd
+          godot --headless --audio-driver Dummy -s tests/test_midi_parser.gd
           echo "Running Main Integration Tests..."
-          godot --headless -s tests/test_main_integration.gd
+          godot --headless --audio-driver Dummy -s tests/test_main_integration.gd
           echo "All tests passed successfully!"
