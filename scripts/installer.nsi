@@ -11,7 +11,7 @@ Unicode True
 ; --- Application Metadata ---
 !define PRODUCT_NAME "LibrePianoRoll"
 !ifndef VERSION
-    !define VERSION "1.0.0-beta"
+    !define VERSION "v1.0.0-beta"
 !endif
 !define PRODUCT_PUBLISHER "LibrePianoRoll Contributors"
 !define PRODUCT_WEB_SITE "https://github.com/gducpm/LibrePianoRoll"
@@ -20,7 +20,7 @@ Unicode True
 
 ; --- Output & Compression ---
 Name "${PRODUCT_NAME} ${VERSION}"
-OutFile "..\build\LibrePianoRoll-Setup-v${VERSION}-x64.exe"
+OutFile "..\build\LibrePianoRoll-Setup-${VERSION}-x64.exe"
 InstallDir "$PROGRAMFILES64\LibrePianoRoll"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 RequestExecutionLevel admin

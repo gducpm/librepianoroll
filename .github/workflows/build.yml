@@ -165,7 +165,7 @@ jobs:
       - name: Upload Release Files Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: release-${{ matrix.name }}
+          name: release-${{ matrix.ext_dir }}
           path: build/*.*
 
   # 3. Publish to GitHub Releases (only on tags)
