@@ -149,8 +149,11 @@ jobs:
       - name: Build Windows NSIS Installer
         if: matrix.is_windows
         run: |
-          makensis /DVERSION=${{ github.ref_name }} scripts/installer.nsi
-        shell: cmd
+          choco install nsis -y
+          $makensis = "C:\Program Files (x86)\NSIS\makensis.exe"
+          if (!(Test-Path $makensis)) { $makensis = "makensis" }
+          & $makensis /DVERSION=${{ github.ref_name }} scripts/installer.nsi
+        shell: pwsh
 
       # --- Packaging Portable Archives ---
       - name: Package Portable Archive
