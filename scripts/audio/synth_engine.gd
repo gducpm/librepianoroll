@@ -65,10 +65,18 @@ func _init_fluidsynth() -> void:
 
 	# Auto-load SoundFont (MS Basic Grand Piano)
 	var sf_path: String = ""
-	if FileAccess.file_exists("res://default.sf3"):
-		sf_path = ProjectSettings.globalize_path("res://default.sf3")
-	elif FileAccess.file_exists("res://default.sf2"):
-		sf_path = ProjectSettings.globalize_path("res://default.sf2")
+	var exe_dir: String = OS.get_executable_path().get_base_dir()
+	var candidates: Array[String] = [
+		exe_dir.path_join("default.sf3"),
+		exe_dir.path_join("default.sf2"),
+		exe_dir.path_join("../Resources/default.sf3"),
+		"res://default.sf3",
+		"res://default.sf2"
+	]
+	for c in candidates:
+		if FileAccess.file_exists(c):
+			sf_path = ProjectSettings.globalize_path(c) if c.begins_with("res://") else c
+			break
 
 	if sf_path != "":
 		load_soundfont(sf_path)

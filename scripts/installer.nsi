@@ -81,8 +81,9 @@ Section "MainSection" SEC01
     SetOutPath "$INSTDIR\addons\fluidsynth"
     File "..\addons\fluidsynth\fluidsynth.gdextension"
 
-    ; Set output path back to root for shortcut working directory
+    ; Set output path back to root for shortcut working directory and root runtime DLLs
     SetOutPath "$INSTDIR"
+    File "..\addons\fluidsynth\bin\*.dll"
 
     ; Create Start Menu Shortcuts
     CreateDirectory "$SMPROGRAMS\LibrePianoRoll"
@@ -117,6 +118,7 @@ Section "Uninstall"
 
     ; Remove Installed Files and Folders
     RMDir /r "$INSTDIR\addons"
+    Delete "$INSTDIR\*.dll"
     Delete "$INSTDIR\LibrePianoRoll.exe"
     Delete "$INSTDIR\LibrePianoRoll.pck"
     Delete "$INSTDIR\default.sf3"

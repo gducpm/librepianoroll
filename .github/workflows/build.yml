@@ -143,6 +143,9 @@ jobs:
           cp default.sf3 ${{ matrix.build_dir }}/ || true
           cp default.mid ${{ matrix.build_dir }}/ || true
           cp LICENSE ${{ matrix.build_dir }}/ || true
+          if [ "${{ matrix.is_windows }}" = "true" ]; then
+            cp addons/fluidsynth/bin/*.dll ${{ matrix.build_dir }}/ || true
+          fi
         shell: bash
 
       # --- NSIS Windows Installer Generation ---
