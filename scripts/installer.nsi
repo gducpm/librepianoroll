@@ -29,8 +29,8 @@ SetCompressor /SOLID lzma
 
 ; --- Interface Settings ---
 !define MUI_ABORTWARNING
-!define MUI_ICON "..\icon.svg"
-!define MUI_UNICON "..\icon.svg"
+!define MUI_ICON "..\icon.ico"
+!define MUI_UNICON "..\icon.ico"
 
 ; --- Installer Pages ---
 ; 1. Welcome Page
