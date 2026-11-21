@@ -165,7 +165,7 @@ jobs:
           elif [ "${{ matrix.name }}" = "MacOS" ]; then
             zip -r ../${{ matrix.package_name }} *
           else
-            zip -r ../${{ matrix.package_name }} *
+            7z a -tzip ../${{ matrix.package_name }} * || "/c/Program Files/7-Zip/7z.exe" a -tzip ../${{ matrix.package_name }} *
           fi
         shell: bash
 
