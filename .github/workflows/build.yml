@@ -29,6 +29,10 @@ jobs:
             build_cmd: |
               cmake -B build
               cmake --build build --config Release
+              if (Test-Path "addons/fluidsynth/bin/Release/godot_fluidsynth.dll") {
+                Copy-Item "addons/fluidsynth/bin/Release/godot_fluidsynth.dll" -Destination "addons/fluidsynth/bin/" -Force
+              }
+              Get-ChildItem -Path "build/fluidsynth" -Filter "*.dll" -Recurse | Copy-Item -Destination "addons/fluidsynth/bin/" -Force
 
           - os: ubuntu-latest
             name: GNU+Linux x86_64
