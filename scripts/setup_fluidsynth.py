@@ -65,11 +65,11 @@ def setup_windows(version: str, project_root: str) -> None:
 
     log("Windows setup complete!")
 
-def setup_linux() -> None:
+def setup_gnu_linux() -> None:
     log("On GNU+Linux, install development packages via your distribution:")
     log("  Debian/Ubuntu: sudo apt install -y libfluidsynth-dev libsndfile1-dev pkg-config cmake")
     log("  Fedora:        sudo dnf install -y fluidsynth-devel libsndfile-devel pkgconf-pkg-config cmake")
-    log("  Arch Linux:    sudo pacman -S fluidsynth libsndfile pkgconf cmake")
+    log("  Arch GNU+Linux: sudo pacman -S fluidsynth libsndfile pkgconf cmake")
 
 def setup_macos() -> None:
     log("On MacOS, install packages via Homebrew:")
@@ -87,7 +87,7 @@ def main() -> None:
     elif sys.platform.startswith("darwin"):
         setup_macos()
     else:
-        setup_linux()
+        setup_gnu_linux()
 
 if __name__ == "__main__":
     main()
